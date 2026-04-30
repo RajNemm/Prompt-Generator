@@ -133,269 +133,107 @@
   .prompt-card:hover { border-color: var(--border2); transform: translateY(-2px); }
 
   .card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
-  .badge {
-    font-size: 11px; font-weight: 600; font-family: 'Syne', sans-serif;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    padding: 4px 12px; border-radius: 999px;
-  }
-  .badge-beginner     { background: rgba(107,255,212,0.1); color: #6bffd4; border: 1px solid rgba(107,255,212,0.2); }
-  .badge-intermediate { background: rgba(255,200,100,0.1); color: #ffc864; border: 1px solid rgba(255,200,100,0.2); }
-  .badge-advanced     { background: rgba(255,120,120,0.1); color: #ff8a8a; border: 1px solid rgba(255,120,120,0.2); }
-  .badge-project      { background: rgba(124,107,255,0.12); color: #b0a0ff; border: 1px solid rgba(124,107,255,0.25); }
-  .badge-concept      { background: rgba(176,107,255,0.1); color: #d09aff; border: 1px solid rgba(176,107,255,0.2); }
-  .badge-interview    { background: rgba(255,160,80,0.1); color: #ffb060; border: 1px solid rgba(255,160,80,0.2); }
+  .badge { font-size: 11px; font-weight: 600; font-family: 'Syne'; padding: 4px 12px; border-radius: 999px; }
 
-  .prompt-number { font-size: 12px; color: var(--muted2); font-family: 'Syne', sans-serif; }
   .prompt-text { font-size: 14.5px; color: #ccc8e8; line-height: 1.75; margin-bottom: 1.1rem; }
 
   .card-actions { display: flex; gap: 8px; }
-  .btn-copy, .btn-use {
-    font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif;
-    padding: 6px 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s;
-  }
-  .btn-copy { background: transparent; border: 1px solid var(--border2); color: var(--muted); }
-  .btn-copy:hover { background: var(--surface2); color: var(--text); }
-  .btn-copy.copied { color: var(--accent3); border-color: rgba(107,255,212,0.3); }
-  .btn-use { background: rgba(124,107,255,0.12); border: 1px solid rgba(124,107,255,0.25); color: #b0a0ff; }
-  .btn-use:hover { background: rgba(124,107,255,0.22); }
-
-  .empty-state { text-align: center; padding: 4rem 1rem; }
-  .empty-icon { font-size: 42px; margin-bottom: 1rem; opacity: 0.4; }
-  .empty-state p { color: var(--muted); font-size: 15px; }
-
-  .loader-wrap { display: flex; flex-direction: column; align-items: center; padding: 3.5rem 1rem; gap: 1.2rem; }
-  .dots { display: flex; gap: 8px; }
-  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); animation: bounce 1.2s infinite; }
-  .dot:nth-child(2) { animation-delay: 0.2s; background: var(--accent2); }
-  .dot:nth-child(3) { animation-delay: 0.4s; background: var(--accent3); }
-  .loader-text { color: var(--muted); font-size: 14px; }
-
-  .footer-note { text-align: center; margin-top: 3rem; font-size: 12px; color: var(--muted2); line-height: 1.8; }
-  .footer-note a { color: var(--accent); text-decoration: none; }
-  .footer-note a:hover { text-decoration: underline; }
-
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  @keyframes bounce { 0%,80%,100%{transform:translateY(0);opacity:0.5} 40%{transform:translateY(-8px);opacity:1} }
-
-  @media (max-width: 600px) {
-    .search-box { flex-direction: column; padding: 12px; }
-    .gen-btn { width: 100%; }
-    .api-row { flex-direction: column; }
-  }
+  .btn-copy, .btn-use { padding: 6px 14px; border-radius: 8px; cursor: pointer; }
 </style>
 </head>
 <body>
-<div class="blob blob1"></div>
-<div class="blob blob2"></div>
 
 <div class="wrapper">
 
   <div class="header">
-    <div class="logo-badge"><span></span> AI-Powered Tool</div>
-    <h1>Generate the <em>Perfect Prompt</em><br>for Any Topic</h1>
-    <p class="subtitle">Type what you want to learn or build — get 6 ready-to-use AI prompts instantly</p>
+    <h1>Generate the <em>Perfect Prompt</em></h1>
   </div>
 
-  <!-- Step 1: API Key -->
+  <!-- UPDATED API SECTION -->
   <div class="api-section">
     <div class="api-label">
-      🔑 Step 1 — Paste your Google Gemini API Key &nbsp;·&nbsp;
-      <a href="https://aistudio.google.com/app/apikey" target="_blank">Get free key here →</a>
+      🔑 Paste your OpenRouter API Key ·
+      <a href="https://openrouter.ai/" target="_blank">Get key →</a>
     </div>
     <div class="api-row">
-      <input type="password" id="apiKeyInput" placeholder="AIzaSy..." />
+      <input type="password" id="apiKeyInput" placeholder="sk-or-xxxxxxxx..." />
       <button class="save-btn" onclick="saveKey()">Save Key</button>
     </div>
     <div class="api-status" id="apiStatus"></div>
   </div>
 
-  <!-- Step 2: Search -->
-  <div class="search-section">
-    <div class="search-box">
-      <input type="text" id="topicInput" placeholder="Step 2 — Type a topic, e.g. Learn Python, Build a website..." />
-      <button class="gen-btn" id="genBtn" onclick="generate()">Generate Prompts ✦</button>
-    </div>
+  <div class="search-box">
+    <input type="text" id="topicInput" placeholder="Enter topic..." />
+    <button class="gen-btn" onclick="generate()">Generate</button>
   </div>
 
-  <div class="quick-picks">
-    <span class="quick-label">Quick picks:</span>
-    <button class="chip" onclick="quick('Learn Python from scratch')">Python</button>
-    <button class="chip" onclick="quick('Build a React website')">React</button>
-    <button class="chip" onclick="quick('Understand Machine Learning')">Machine Learning</button>
-    <button class="chip" onclick="quick('Learn Data Structures and Algorithms')">DSA</button>
-    <button class="chip" onclick="quick('Build a REST API with Node.js')">REST API</button>
-    <button class="chip" onclick="quick('Learn SQL and databases')">SQL</button>
-    <button class="chip" onclick="quick('Understand Git and GitHub')">Git</button>
-    <button class="chip" onclick="quick('Learn Cybersecurity basics')">Cybersecurity</button>
-  </div>
+  <div id="resultsArea"></div>
 
-  <div class="status-bar" id="statusBar"></div>
-
-  <div id="resultsArea">
-    <div class="empty-state">
-      <div class="empty-icon">✦</div>
-      <p>Enter any topic above and click <strong>Generate Prompts</strong></p>
-    </div>
-  </div>
-
-  <div class="footer-note">
-    Powered by Google Gemini API &nbsp;·&nbsp; Free tier — no credit card needed &nbsp;·&nbsp;
-    <a href="https://aistudio.google.com/app/apikey" target="_blank">Get your free API key</a>
-  </div>
 </div>
 
 <script>
-  let API_KEY = localStorage.getItem('gemini_key') || '';
-  let currentPrompts = [];
+let API_KEY = localStorage.getItem('openrouter_key') || '';
+let currentPrompts = [];
 
-  if (API_KEY) {
-    document.getElementById('apiKeyInput').value = API_KEY;
-    document.getElementById('apiStatus').textContent = '✓ API key loaded from saved storage';
-    document.getElementById('apiStatus').className = 'api-status ok';
-  }
+function saveKey() {
+  const val = document.getElementById('apiKeyInput').value.trim();
+  if (!val) { alert("Enter key"); return; }
+  API_KEY = val;
+  localStorage.setItem('openrouter_key', val);
+  document.getElementById('apiStatus').innerText = "Saved ✅";
+}
 
-  function saveKey() {
-    const val = document.getElementById('apiKeyInput').value.trim();
-    if (!val) { setApiStatus('Please enter your API key', false); return; }
-    if (!val.startsWith('AIza')) { setApiStatus('Gemini keys start with "AIza" — please check yours', false); return; }
-    API_KEY = val;
-    localStorage.setItem('gemini_key', val);
-    setApiStatus('✓ API key saved! Now type a topic and generate prompts.', true);
-  }
+async function generate() {
+  const topic = document.getElementById('topicInput').value.trim();
+  if (!topic) return alert("Enter topic");
 
-  function setApiStatus(msg, ok) {
-    const el = document.getElementById('apiStatus');
-    el.textContent = msg;
-    el.className = 'api-status ' + (ok ? 'ok' : 'err');
-  }
+  const prompt = `Return ONLY JSON array of 6 prompts for: ${topic}`;
 
-  function quick(text) {
-    document.getElementById('topicInput').value = text;
-    generate();
-  }
-
-  async function generate() {
-    const topic = document.getElementById('topicInput').value.trim();
-    if (!topic) { alert('Please enter a topic first!'); return; }
-    if (!API_KEY) {
-      setApiStatus('⚠ Please enter and save your Gemini API key first (Step 1 above)', false);
-      document.getElementById('apiKeyInput').focus();
-      return;
-    }
-
-    const btn = document.getElementById('genBtn');
-    btn.disabled = true;
-    showLoader();
-    document.getElementById('statusBar').textContent = '';
-
-    const prompt = `You are an expert at writing highly effective AI prompts.
-Given a topic, generate exactly 6 diverse prompts a user can paste into any AI chatbot.
-Return ONLY a valid JSON array. No markdown, no explanation, no backticks, no extra text.
-Each object must have:
-- "label": one of exactly: "Beginner", "Intermediate", "Advanced", "Project", "Concept", "Interview"
-- "prompt": a ready-to-use, specific, actionable prompt (2-3 sentences)
-
-Generate 6 prompts for the topic: "${topic}"`;
-
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
-
-    try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.8, maxOutputTokens: 1200 }
-        })
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err?.error?.message || `HTTP ${res.status}`);
-      }
-
-      const data = await res.json();
-      const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      const clean = raw.replace(/```json|```/g, '').trim();
-      const prompts = JSON.parse(clean);
-
-      currentPrompts = prompts;
-      renderCards(prompts, topic);
-      document.getElementById('statusBar').textContent = `✦ ${prompts.length} prompts generated for "${topic}"`;
-
-    } catch (e) {
-      showError(e.message);
-    }
-
-    btn.disabled = false;
-  }
-
-  function renderCards(prompts, topic) {
-    const area = document.getElementById('resultsArea');
-    area.innerHTML = '<div class="results-grid" id="grid"></div>';
-    const grid = document.getElementById('grid');
-
-    prompts.forEach((p, i) => {
-      const badgeMap = {
-        Beginner: 'badge-beginner', Intermediate: 'badge-intermediate',
-        Advanced: 'badge-advanced', Project: 'badge-project',
-        Concept: 'badge-concept', Interview: 'badge-interview'
-      };
-      const card = document.createElement('div');
-      card.className = 'prompt-card';
-      card.style.animationDelay = (i * 0.08) + 's';
-      card.innerHTML = `
-        <div class="card-top">
-          <span class="badge ${badgeMap[p.label] || 'badge-concept'}">${p.label}</span>
-          <span class="prompt-number">#${String(i+1).padStart(2,'0')}</span>
-        </div>
-        <div class="prompt-text">${escHtml(p.prompt)}</div>
-        <div class="card-actions">
-          <button class="btn-copy" id="copy-${i}" onclick="copyPrompt(${i})">Copy prompt</button>
-          <button class="btn-use" onclick="openChatGPT(${i})">Try in ChatGPT ↗</button>
-        </div>`;
-      grid.appendChild(card);
+  try {
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${API_KEY}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": window.location.origin,
+        "X-Title": "PromptCraft"
+      },
+      body: JSON.stringify({
+        model: "openai/gpt-oss-120b:free",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.8
+      })
     });
-  }
 
-  function copyPrompt(idx) {
-    navigator.clipboard.writeText(currentPrompts[idx].prompt).then(() => {
-      const btn = document.getElementById('copy-' + idx);
-      btn.textContent = '✓ Copied!';
-      btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = 'Copy prompt'; btn.classList.remove('copied'); }, 2000);
-    });
-  }
+    const data = await res.json();
 
-  function openChatGPT(idx) {
-    window.open('https://chat.openai.com/?q=' + encodeURIComponent(currentPrompts[idx].prompt), '_blank');
-  }
+    const raw = data?.choices?.[0]?.message?.content || "";
+    const clean = raw.replace(/```json|```/g, '').trim();
 
-  function showLoader() {
-    document.getElementById('resultsArea').innerHTML = `
-      <div class="loader-wrap">
-        <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-        <span class="loader-text">Crafting your prompts with Gemini AI…</span>
-      </div>`;
-  }
+    let prompts;
+    try { prompts = JSON.parse(clean); }
+    catch { throw new Error("Invalid JSON"); }
 
-  function showError(msg) {
-    document.getElementById('resultsArea').innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">⚠</div>
-        <p style="color:#ff8a8a;">Error: ${escHtml(msg)}</p>
-        <p style="margin-top:8px;font-size:13px;color:#8888aa;">Check your API key and try again.</p>
-      </div>`;
-    document.getElementById('statusBar').textContent = '';
-  }
+    render(prompts);
 
-  function escHtml(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  } catch (e) {
+    document.getElementById("resultsArea").innerHTML =
+      `<p style="color:red;">${e.message}</p>`;
   }
+}
 
-  document.getElementById('topicInput').addEventListener('keydown', e => { if (e.key==='Enter') generate(); });
-  document.getElementById('apiKeyInput').addEventListener('keydown', e => { if (e.key==='Enter') saveKey(); });
+function render(prompts) {
+  const el = document.getElementById("resultsArea");
+  el.innerHTML = "";
+
+  prompts.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "prompt-card";
+    div.innerHTML = `<p>${p.prompt}</p>`;
+    el.appendChild(div);
+  });
+}
 </script>
+
 </body>
 </html>
