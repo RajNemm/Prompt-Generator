@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PromptCraft — AI Prompt Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.14);
+    --accent: #7c6bff;
+    --accent2: #b06bff;
+    --accent3: #6bffd4;
+    --text: #f0eeff;
+    --muted: #8888aa;
+    --muted2: #4a4a6a;
+    --card-bg: #0f0f1a;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(124,107,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,107,255,0.04) 1px, transparent 1px);
+    background-size: 44px 44px;
+    pointer-events: none; z-index: 0;
+  }
+
+  .blob { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; }
+  .blob1 { width: 600px; height: 600px; top: -180px; left: -180px;
+    background: radial-gradient(circle, rgba(124,107,255,0.13) 0%, transparent 65%); }
+  .blob2 { width: 500px; height: 500px; bottom: -150px; right: -150px;
+    background: radial-gradient(circle, rgba(107,255,212,0.08) 0%, transparent 65%); }
+
+  .wrapper { position: relative; z-index: 1; max-width: 820px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+
+  .header { text-align: center; margin-bottom: 3rem; animation: fadeUp 0.6s ease both; }
+  .logo-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(124,107,255,0.1); border: 1px solid rgba(124,107,255,0.25);
+    border-radius: 999px; padding: 5px 16px; margin-bottom: 1.5rem;
+    font-size: 12px; font-weight: 500; color: #b0a0ff; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .logo-badge span { width: 7px; height: 7px; border-radius: 50%; background: var(--accent3); display: inline-block; animation: pulse 2s infinite; }
+  h1 { font-family: 'Syne', sans-serif; font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; line-height: 1.1; margin-bottom: 1rem; }
+  h1 em { font-style: normal; background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .subtitle { font-size: 16px; color: var(--muted); max-width: 480px; margin: 0 auto; line-height: 1.7; }
+
+  .api-section {
+    background: var(--surface); border: 1px solid var(--border2);
+    border-radius: 16px; padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem; animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .api-label { font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 0.6rem; }
+  .api-label a { color: var(--accent3); text-decoration: none; }
+  .api-label a:hover { text-decoration: underline; }
+  .api-row { display: flex; gap: 10px; }
+  .api-row input {
+    flex: 1; background: var(--card-bg); border: 1px solid var(--border2); border-radius: 10px;
+    padding: 10px 14px; color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: 14px; outline: none; transition: border-color 0.2s;
+  }
+  .api-row input:focus { border-color: var(--accent); }
+  .api-row input::placeholder { color: var(--muted2); }
+  .save-btn {
+    background: rgba(124,107,255,0.15); border: 1px solid rgba(124,107,255,0.3);
+    color: #c0b0ff; padding: 10px 18px; border-radius: 10px; cursor: pointer;
+    font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; transition: all 0.2s; white-space: nowrap;
+  }
+  .save-btn:hover { background: rgba(124,107,255,0.25); }
+  .api-status { font-size: 12px; margin-top: 8px; min-height: 18px; }
+  .api-status.ok { color: var(--accent3); }
+  .api-status.err { color: #ff7b7b; }
+
+  .search-section { margin-bottom: 1.5rem; animation: fadeUp 0.6s 0.2s ease both; }
+  .search-box {
+    display: flex; gap: 10px;
+    background: var(--surface); border: 1px solid var(--border2);
+    border-radius: 16px; padding: 8px 8px 8px 20px;
+    transition: border-color 0.2s;
+  }
+  .search-box:focus-within { border-color: rgba(124,107,255,0.5); }
+  .search-box input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px;
+  }
+  .search-box input::placeholder { color: var(--muted2); }
+  .gen-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; color: #fff; padding: 12px 24px;
+    border-radius: 10px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.2s, transform 0.15s; white-space: nowrap;
+  }
+  .gen-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .gen-btn:active { transform: translateY(0); }
+  .gen-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .quick-picks { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 2rem; animation: fadeUp 0.6s 0.3s ease both; }
+  .quick-label { font-size: 12px; color: var(--muted2); align-self: center; margin-right: 2px; }
+  .chip {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--muted); padding: 5px 14px; border-radius: 999px;
+    font-size: 13px; cursor: pointer; transition: all 0.2s;
+  }
+  .chip:hover { background: rgba(124,107,255,0.12); border-color: rgba(124,107,255,0.3); color: var(--text); }
+
+  .status-bar { font-size: 13px; color: var(--muted); margin-bottom: 1.2rem; min-height: 20px; }
+
+  .results-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+
+  .prompt-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.3rem 1.5rem;
+    transition: border-color 0.2s, transform 0.2s;
+    animation: fadeUp 0.4s ease both;
+  }
+  .prompt-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+
+  .card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+  .badge {
+    font-size: 11px; font-weight: 600; font-family: 'Syne', sans-serif;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 999px;
+  }
+  .badge-beginner     { background: rgba(107,255,212,0.1); color: #6bffd4; border: 1px solid rgba(107,255,212,0.2); }
+  .badge-intermediate { background: rgba(255,200,100,0.1); color: #ffc864; border: 1px solid rgba(255,200,100,0.2); }
+  .badge-advanced     { background: rgba(255,120,120,0.1); color: #ff8a8a; border: 1px solid rgba(255,120,120,0.2); }
+  .badge-project      { background: rgba(124,107,255,0.12); color: #b0a0ff; border: 1px solid rgba(124,107,255,0.25); }
+  .badge-concept      { background: rgba(176,107,255,0.1); color: #d09aff; border: 1px solid rgba(176,107,255,0.2); }
+  .badge-interview    { background: rgba(255,160,80,0.1); color: #ffb060; border: 1px solid rgba(255,160,80,0.2); }
+
+  .prompt-number { font-size: 12px; color: var(--muted2); font-family: 'Syne', sans-serif; }
+  .prompt-text { font-size: 14.5px; color: #ccc8e8; line-height: 1.75; margin-bottom: 1.1rem; }
+
+  .card-actions { display: flex; gap: 8px; }
+  .btn-copy, .btn-use {
+    font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+    padding: 6px 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-copy { background: transparent; border: 1px solid var(--border2); color: var(--muted); }
+  .btn-copy:hover { background: var(--surface2); color: var(--text); }
+  .btn-copy.copied { color: var(--accent3); border-color: rgba(107,255,212,0.3); }
+  .btn-use { background: rgba(124,107,255,0.12); border: 1px solid rgba(124,107,255,0.25); color: #b0a0ff; }
+  .btn-use:hover { background: rgba(124,107,255,0.22); }
+
+  .empty-state { text-align: center; padding: 4rem 1rem; }
+  .empty-icon { font-size: 42px; margin-bottom: 1rem; opacity: 0.4; }
+  .empty-state p { color: var(--muted); font-size: 15px; }
+
+  .loader-wrap { display: flex; flex-direction: column; align-items: center; padding: 3.5rem 1rem; gap: 1.2rem; }
+  .dots { display: flex; gap: 8px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); animation: bounce 1.2s infinite; }
+  .dot:nth-child(2) { animation-delay: 0.2s; background: var(--accent2); }
+  .dot:nth-child(3) { animation-delay: 0.4s; background: var(--accent3); }
+  .loader-text { color: var(--muted); font-size: 14px; }
+
+  .footer-note { text-align: center; margin-top: 3rem; font-size: 12px; color: var(--muted2); line-height: 1.8; }
+  .footer-note a { color: var(--accent); text-decoration: none; }
+  .footer-note a:hover { text-decoration: underline; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  @keyframes bounce { 0%,80%,100%{transform:translateY(0);opacity:0.5} 40%{transform:translateY(-8px);opacity:1} }
+
+  @media (max-width: 600px) {
+    .search-box { flex-direction: column; padding: 12px; }
+    .gen-btn { width: 100%; }
+    .api-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+
+<div class="wrapper">
+
+  <div class="header">
+    <div class="logo-badge"><span></span> AI-Powered Tool</div>
+    <h1>Generate the <em>Perfect Prompt</em><br>for Any Topic</h1>
+    <p class="subtitle">Type what you want to learn or build — get 6 ready-to-use AI prompts instantly</p>
+  </div>
+
+  <!-- Step 1: API Key -->
+  <div class="api-section">
+    <div class="api-label">
+      🔑 Step 1 — Paste your Google Gemini API Key &nbsp;·&nbsp;
+      <a href="https://aistudio.google.com/app/apikey" target="_blank">Get free key here →</a>
+    </div>
+    <div class="api-row">
+      <input type="password" id="apiKeyInput" placeholder="AIzaSy..." />
+      <button class="save-btn" onclick="saveKey()">Save Key</button>
+    </div>
+    <div class="api-status" id="apiStatus"></div>
+  </div>
+
+  <!-- Step 2: Search -->
+  <div class="search-section">
+    <div class="search-box">
+      <input type="text" id="topicInput" placeholder="Step 2 — Type a topic, e.g. Learn Python, Build a website..." />
+      <button class="gen-btn" id="genBtn" onclick="generate()">Generate Prompts ✦</button>
+    </div>
+  </div>
+
+  <div class="quick-picks">
+    <span class="quick-label">Quick picks:</span>
+    <button class="chip" onclick="quick('Learn Python from scratch')">Python</button>
+    <button class="chip" onclick="quick('Build a React website')">React</button>
+    <button class="chip" onclick="quick('Understand Machine Learning')">Machine Learning</button>
+    <button class="chip" onclick="quick('Learn Data Structures and Algorithms')">DSA</button>
+    <button class="chip" onclick="quick('Build a REST API with Node.js')">REST API</button>
+    <button class="chip" onclick="quick('Learn SQL and databases')">SQL</button>
+    <button class="chip" onclick="quick('Understand Git and GitHub')">Git</button>
+    <button class="chip" onclick="quick('Learn Cybersecurity basics')">Cybersecurity</button>
+  </div>
+
+  <div class="status-bar" id="statusBar"></div>
+
+  <div id="resultsArea">
+    <div class="empty-state">
+      <div class="empty-icon">✦</div>
+      <p>Enter any topic above and click <strong>Generate Prompts</strong></p>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    Powered by Google Gemini API &nbsp;·&nbsp; Free tier — no credit card needed &nbsp;·&nbsp;
+    <a href="https://aistudio.google.com/app/apikey" target="_blank">Get your free API key</a>
+  </div>
+</div>
+
+<script>
+  let API_KEY = localStorage.getItem('gemini_key') || '';
+  let currentPrompts = [];
+
+  if (API_KEY) {
+    document.getElementById('apiKeyInput').value = API_KEY;
+    document.getElementById('apiStatus').textContent = '✓ API key loaded from saved storage';
+    document.getElementById('apiStatus').className = 'api-status ok';
+  }
+
+  function saveKey() {
+    const val = document.getElementById('apiKeyInput').value.trim();
+    if (!val) { setApiStatus('Please enter your API key', false); return; }
+    if (!val.startsWith('AIza')) { setApiStatus('Gemini keys start with "AIza" — please check yours', false); return; }
+    API_KEY = val;
+    localStorage.setItem('gemini_key', val);
+    setApiStatus('✓ API key saved! Now type a topic and generate prompts.', true);
+  }
+
+  function setApiStatus(msg, ok) {
+    const el = document.getElementById('apiStatus');
+    el.textContent = msg;
+    el.className = 'api-status ' + (ok ? 'ok' : 'err');
+  }
+
+  function quick(text) {
+    document.getElementById('topicInput').value = text;
+    generate();
+  }
+
+  async function generate() {
+    const topic = document.getElementById('topicInput').value.trim();
+    if (!topic) { alert('Please enter a topic first!'); return; }
+    if (!API_KEY) {
+      setApiStatus('⚠ Please enter and save your Gemini API key first (Step 1 above)', false);
+      document.getElementById('apiKeyInput').focus();
+      return;
+    }
+
+    const btn = document.getElementById('genBtn');
+    btn.disabled = true;
+    showLoader();
+    document.getElementById('statusBar').textContent = '';
+
+    const prompt = `You are an expert at writing highly effective AI prompts.
+Given a topic, generate exactly 6 diverse prompts a user can paste into any AI chatbot.
+Return ONLY a valid JSON array. No markdown, no explanation, no backticks, no extra text.
+Each object must have:
+- "label": one of exactly: "Beginner", "Intermediate", "Advanced", "Project", "Concept", "Interview"
+- "prompt": a ready-to-use, specific, actionable prompt (2-3 sentences)
+
+Generate 6 prompts for the topic: "${topic}"`;
+
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.8, maxOutputTokens: 1200 }
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err?.error?.message || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const clean = raw.replace(/```json|```/g, '').trim();
+      const prompts = JSON.parse(clean);
+
+      currentPrompts = prompts;
+      renderCards(prompts, topic);
+      document.getElementById('statusBar').textContent = `✦ ${prompts.length} prompts generated for "${topic}"`;
+
+    } catch (e) {
+      showError(e.message);
+    }
+
+    btn.disabled = false;
+  }
+
+  function renderCards(prompts, topic) {
+    const area = document.getElementById('resultsArea');
+    area.innerHTML = '<div class="results-grid" id="grid"></div>';
+    const grid = document.getElementById('grid');
+
+    prompts.forEach((p, i) => {
+      const badgeMap = {
+        Beginner: 'badge-beginner', Intermediate: 'badge-intermediate',
+        Advanced: 'badge-advanced', Project: 'badge-project',
+        Concept: 'badge-concept', Interview: 'badge-interview'
+      };
+      const card = document.createElement('div');
+      card.className = 'prompt-card';
+      card.style.animationDelay = (i * 0.08) + 's';
+      card.innerHTML = `
+        <div class="card-top">
+          <span class="badge ${badgeMap[p.label] || 'badge-concept'}">${p.label}</span>
+          <span class="prompt-number">#${String(i+1).padStart(2,'0')}</span>
+        </div>
+        <div class="prompt-text">${escHtml(p.prompt)}</div>
+        <div class="card-actions">
+          <button class="btn-copy" id="copy-${i}" onclick="copyPrompt(${i})">Copy prompt</button>
+          <button class="btn-use" onclick="openChatGPT(${i})">Try in ChatGPT ↗</button>
+        </div>`;
+      grid.appendChild(card);
+    });
+  }
+
+  function copyPrompt(idx) {
+    navigator.clipboard.writeText(currentPrompts[idx].prompt).then(() => {
+      const btn = document.getElementById('copy-' + idx);
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy prompt'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function openChatGPT(idx) {
+    window.open('https://chat.openai.com/?q=' + encodeURIComponent(currentPrompts[idx].prompt), '_blank');
+  }
+
+  function showLoader() {
+    document.getElementById('resultsArea').innerHTML = `
+      <div class="loader-wrap">
+        <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <span class="loader-text">Crafting your prompts with Gemini AI…</span>
+      </div>`;
+  }
+
+  function showError(msg) {
+    document.getElementById('resultsArea').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠</div>
+        <p style="color:#ff8a8a;">Error: ${escHtml(msg)}</p>
+        <p style="margin-top:8px;font-size:13px;color:#8888aa;">Check your API key and try again.</p>
+      </div>`;
+    document.getElementById('statusBar').textContent = '';
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  document.getElementById('topicInput').addEventListener('keydown', e => { if (e.key==='Enter') generate(); });
+  document.getElementById('apiKeyInput').addEventListener('keydown', e => { if (e.key==='Enter') saveKey(); });
+</script>
+</body>
+</html>
