@@ -6,7 +6,7 @@
 
 ## 🌐 Live Demo
 
-🔗 **[promptcraft.vercel.app](https://promptcraft.vercel.app)** *(replace with your actual Vercel URL)*
+🔗 **[promptcraft.vercel.app](https://prompt-generator-vignan.vercel.app/)** *(replace with your actual Vercel URL)*
 
 ---
 
