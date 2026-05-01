@@ -276,6 +276,43 @@
     generate();
   }
 
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  async function callOpenRouter(prompt, retries = 2) {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`,
+        'HTTP-Referer': window.location.href,
+        'X-Title': 'PromptCraft'
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-3.3-70b-instruct:free',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.8,
+        max_tokens: 1200
+      })
+    });
+
+    // 429 = rate limited → wait and retry
+    if (res.status === 429 && retries > 0) {
+      document.querySelector('.loader-text').textContent = 'Rate limited — retrying in 5 seconds…';
+      await sleep(5000);
+      return callOpenRouter(prompt, retries - 1);
+    }
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      const msg = err?.error?.message || `HTTP ${res.status}`;
+      if (res.status === 429) throw new Error('Rate limit reached. Please wait a minute and try again.');
+      if (res.status === 401) throw new Error('Invalid API key. Please check and re-enter your OpenRouter key.');
+      throw new Error(msg);
+    }
+
+    return res.json();
+  }
+
   async function generate() {
     const topic = document.getElementById('topicInput').value.trim();
     if (!topic) { alert('Please enter a topic first!'); return; }
@@ -299,31 +336,8 @@ Each object must have:
 
 Generate 6 prompts for the topic: "${topic}"`;
 
-    const endpoint = 'https://openrouter.ai/api/v1/chat/completions';
-
     try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_KEY}`,
-          'HTTP-Referer': window.location.href,
-          'X-Title': 'PromptCraft'
-        },
-        body: JSON.stringify({
-          model: 'meta-llama/llama-3.3-70b-instruct:free',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.8,
-          max_tokens: 1200
-        })
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err?.error?.message || `HTTP ${res.status}`);
-      }
-
-      const data = await res.json();
+      const data = await callOpenRouter(prompt);
       const raw = data?.choices?.[0]?.message?.content || '';
       const clean = raw.replace(/```json|```/g, '').trim();
       const prompts = JSON.parse(clean);
