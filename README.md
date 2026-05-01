@@ -91,19 +91,6 @@ promptcraft/
 
 > The entire application lives in a single `index.html` file. No frameworks, no dependencies, no build tools required.
 
----
-
-## 📸 Screenshots
-
-### Home Page
-![Home Page](screenshots/home.png)
-
-### Generated Prompts Modal
-![Prompts Modal](screenshots/modal.png)
-
-*(Add your own screenshots in a `/screenshots` folder)*
-
----
 
 ## 🔑 API Details
 
@@ -172,7 +159,7 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## 👨‍💻 Author
 
-Built by **[Your Name]** as a college project — [Your College Name], 2025–26.
+Built by **NEMMADI RAJ KUMAR** as a college project — VIGNAN UNIVERSITY, 2024–26.
 
 ---
 
